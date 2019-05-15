@@ -1,3 +1,4 @@
+// For full API documentation, including code examples, visit http://wix.to/94BuAAs
 
 import wixData from 'wix-data';
 
@@ -6,9 +7,9 @@ import wixData from 'wix-data';
 
 // count input error
 function countInputError(errElement) {
-	errElement.show();
+	errElement.expand();
 	setTimeout(() => {
-		errElement.hide();
+		errElement.collapse();
 	}, 2500);
 }
 
@@ -113,6 +114,7 @@ export function updStatusDrpdown_change(event) {
 	} else {
 		let toUpdate = {
 			"_id": dataObject._id,
+			"orderCode": dataObject.orderCode,
 			"custEmail": dataObject.custEmail,
 			"custName": dataObject.custName,
 			"currentCount": dataObject.currentCount,
@@ -173,9 +175,10 @@ export function updProdCount_keyPress(event) {
 		} else {
 			let toUpdate = {
 				"_id": dataObject._id,
+				"orderCode": dataObject.orderCode,
 				"custEmail": dataObject.custEmail,
 				"custName": dataObject.custName,
-				"currentCount": countInput.value, // only changing this data
+				"currentCount": Number(countInput.value), // only changing this data. Change to number to make sure its stored as an integer in the DB
 				"endCount": dataObject.endCount,
 				"productName": dataObject.productName,
 				"orderStatus": dataObject.orderStatus
@@ -202,3 +205,4 @@ export function updProdCount_keyPress(event) {
 		}
 	}
 }
+
