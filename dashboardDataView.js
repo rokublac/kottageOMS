@@ -1,11 +1,10 @@
-// For full API documentation, including code examples, visit http://wix.to/94BuAAs
 
 import wixData from 'wix-data';
 
 
-
 // === FUNCTION LIST (start) === //
 
+// count input error
 function countInputError(errElement) {
 	errElement.show();
 	setTimeout(() => {
@@ -13,8 +12,73 @@ function countInputError(errElement) {
 	}, 2500);
 }
 
+// progressB bar updater
+function progressBarUpdater() {
+	 $w('#mainRepeater').forEachItem(($item) => {
+		let dataObject = $item("#ordersDataset").getCurrentItem();
+		let progressRatio = dataObject.currentCount / dataObject.endCount;
+
+		// progress bar segmented into four
+		let progress25 = $item('#progressBar25');
+		let progress50 = $item('#progressBar50');
+		let progress75 = $item('#progressBar75');
+		let progress100 = $item('#progressBar100');
+
+		if (progressRatio > 0 && progressRatio <= 0.25) {
+			progress25.style.backgroundColor = 'rgba(118, 255, 112, 1)';
+			progress25.show();
+			progress50.hide();
+			progress75.hide();
+			progress100.hide();
+		} else if (progressRatio > 0.25 && progressRatio <= 0.50) {
+			progress25.style.backgroundColor = 'rgba(118, 255, 112, 1)';
+			progress50.style.backgroundColor = 'rgba(118, 255, 112, 1)';
+			progress25.show();
+			progress50.show();
+			progress75.hide();
+			progress100.hide();
+		} else if (progressRatio > 0.50 && progressRatio < 1) {
+			progress25.style.backgroundColor = 'rgba(118, 255, 112, 1)';
+			progress50.style.backgroundColor = 'rgba(118, 255, 112, 1)';
+			progress75.style.backgroundColor = 'rgba(118, 255, 112, 1)';
+			progress25.show();
+			progress50.show();
+			progress75.show();
+			progress100.hide();
+		} else if (progressRatio === 1) {
+			progress25.style.backgroundColor = 'rgba(118, 255, 112, 1)';
+			progress50.style.backgroundColor = 'rgba(118, 255, 112, 1)';
+			progress75.style.backgroundColor = 'rgba(118, 255, 112, 1)';
+			progress100.style.backgroundColor = 'rgba(118, 255, 112, 1)';
+			progress25.show();
+			progress50.show();
+			progress75.show();
+			progress100.show();
+		} else if (progressRatio === 0) {
+			progress25.style.backgroundColor = 'rgba(227, 238, 255, 1)';
+			progress50.style.backgroundColor = 'rgba(227, 238, 255, 1)';
+			progress75.style.backgroundColor = 'rgba(227, 238, 255, 1)';
+			progress100.style.backgroundColor = 'rgba(227, 238, 255, 1)';
+			progress25.show();
+			progress50.show();
+			progress75.show();
+			progress100.show();
+		}
+	})
+}
+
 // === FUNCTION LIST (end) === //
 
+// === On ready (start) === //
+
+// Progress bar code
+$w.onReady(function () {
+	$w("#ordersDataset").onReady(() => {
+		progressBarUpdater();
+	})
+});
+
+// === On ready (end) === //
 
 // ========== Update box functions (Start) ========== //
 
@@ -105,7 +169,7 @@ export function updProdCount_keyPress(event) {
 			countInputError($item("#errTxtAboveEnd"));
 		} else if (countInput.value.length >= 2 && countInput.value.charAt(0) === '0') { // odd error fix where if you enter a number starting with 0 such as 0987, it will still work
 			countInputError($item("#errTxtBlank"));
-		// === Input error check (end) === //
+			// === Input error check (end) === //
 		} else {
 			let toUpdate = {
 				"_id": dataObject._id,
@@ -129,6 +193,7 @@ export function updProdCount_keyPress(event) {
 							loadingIcon.hide();
 							$item('#orderProgress').show();
 							countInput.value = 'Update Status'; //refersh to default dropdown text/value
+							progressBarUpdater();
 						})
 				})
 				.catch((err) => {
