@@ -1,9 +1,19 @@
-// For full API documentation, including code examples, visit http://wix.to/94BuAAs
-
 import wixData from 'wix-data';
 
+// ============================================= FUNCTION LIST (start) ============================================= //
 
-// === FUNCTION LIST (start) === //
+//data logger
+function dataLogging(oldValue, newValue, logAction, orderId) {
+	let toInsert = {
+		"title": `${oldValue} --> ${newValue}`,
+		"logAction": logAction,
+		"orderId": orderId
+	}
+	wixData.insert('dbLogs', toInsert)
+		.then((res) => {
+			console.log('action logged');
+		})
+}
 
 // count input error
 function countInputError(errElement) {
@@ -14,8 +24,8 @@ function countInputError(errElement) {
 }
 
 // progressB bar updater
-function progressBarUpdater() {
-	 $w('#mainRepeater').forEachItem(($item) => {
+function mainProgressBarUpdater() {
+	$w('#mainRepeater').forEachItem(($item) => {
 		let dataObject = $item("#ordersDataset").getCurrentItem();
 		let progressRatio = dataObject.currentCount / dataObject.endCount;
 
@@ -68,22 +78,93 @@ function progressBarUpdater() {
 	})
 }
 
-// === FUNCTION LIST (end) === //
+// === This function updates the progress bar within the scope of the event context.
+// The function above will iterate through all items which is only needed on inital data load, not everytime someone updates one order.
+function contextProgressBarUpdater(context) { // context is $item that is passed through from the scope thats calling this function.
+	let dataObject = context("#ordersDataset").getCurrentItem();
+	let progressRatio = dataObject.currentCount / dataObject.endCount;
 
-// === On ready (start) === //
+	// progress bar segmented into four
+	let progress25 = context('#progressBar25');
+	let progress50 = context('#progressBar50');
+	let progress75 = context('#progressBar75');
+	let progress100 = context('#progressBar100');
+
+	if (progressRatio > 0 && progressRatio <= 0.25) {
+		progress25.style.backgroundColor = 'rgba(118, 255, 112, 1)';
+		progress25.show();
+		progress50.hide();
+		progress75.hide();
+		progress100.hide();
+	} else if (progressRatio > 0.25 && progressRatio <= 0.50) {
+		progress25.style.backgroundColor = 'rgba(118, 255, 112, 1)';
+		progress50.style.backgroundColor = 'rgba(118, 255, 112, 1)';
+		progress25.show();
+		progress50.show();
+		progress75.hide();
+		progress100.hide();
+	} else if (progressRatio > 0.50 && progressRatio < 1) {
+		progress25.style.backgroundColor = 'rgba(118, 255, 112, 1)';
+		progress50.style.backgroundColor = 'rgba(118, 255, 112, 1)';
+		progress75.style.backgroundColor = 'rgba(118, 255, 112, 1)';
+		progress25.show();
+		progress50.show();
+		progress75.show();
+		progress100.hide();
+	} else if (progressRatio === 1) {
+		progress25.style.backgroundColor = 'rgba(118, 255, 112, 1)';
+		progress50.style.backgroundColor = 'rgba(118, 255, 112, 1)';
+		progress75.style.backgroundColor = 'rgba(118, 255, 112, 1)';
+		progress100.style.backgroundColor = 'rgba(118, 255, 112, 1)';
+		progress25.show();
+		progress50.show();
+		progress75.show();
+		progress100.show();
+	} else if (progressRatio === 0) {
+		progress25.style.backgroundColor = 'rgba(227, 238, 255, 1)';
+		progress50.style.backgroundColor = 'rgba(227, 238, 255, 1)';
+		progress75.style.backgroundColor = 'rgba(227, 238, 255, 1)';
+		progress100.style.backgroundColor = 'rgba(227, 238, 255, 1)';
+		progress25.show();
+		progress50.show();
+		progress75.show();
+		progress100.show();
+	}
+}
+
+// ============================================= FUNCTION LIST (end) ============================================= //
+
+// ======== On ready (start) ======== //
 
 // Progress bar code
 $w.onReady(function () {
 	$w("#ordersDataset").onReady(() => {
-		progressBarUpdater();
+		// progress bar initial injection
+		mainProgressBarUpdater();
+		// notes inital injection
+		$w('#mainRepeater').forEachItem(($item) => {
+			let dataObject = $item("#ordersDataset").getCurrentItem();
+			let repeaterNote = $item('#notesInputBox');
+			let noteIcon = $item('#notesIcon');
+			let notesIconNoNote = $item('#notesIconNoNote');
+
+			repeaterNote.value = dataObject.orderNote;
+			if (repeaterNote.value.length === 0) {
+				noteIcon.hide();
+				notesIconNoNote.show();
+			} else {
+				noteIcon.show();
+				notesIconNoNote.hide();
+			}
+		})
 	})
 });
 
-// === On ready (end) === //
+// ========== On ready (end) ========= //
 
 // ========== Update box functions (Start) ========== //
 
-// === Activate update UI
+// === Activate update UI toggle
 export function updateBtn_click(event) {
 	let $item = $w.at(event.context);
 	let button = $item('#updateBtn');
@@ -100,6 +181,34 @@ export function updateBtn_click(event) {
 			button.label = 'Update';
 			$item('#circle').hide();
 		});
+	}
+}
+
+// === Active Notes box toggle
+export function notesIcon_click(event) {
+	let $item = $w.at(event.context);
+	let notesContainer = $item('#notesContainer');
+
+	if (notesContainer.collapsed) {
+		let dataObject = $item("#ordersDataset").getCurrentItem();
+		$item('#notesInputBox').value = dataObject.orderNote;
+		notesContainer.expand();
+	} else if (notesContainer.expand) {
+		notesContainer.collapse();
+	}
+}
+
+// === No notes icon box toggle
+export function notesIconNoNote_click(event) {
+	let $item = $w.at(event.context);
+	let notesContainer = $item('#notesContainer');
+
+	if (notesContainer.collapsed) {
+		let dataObject = $item("#ordersDataset").getCurrentItem();
+		$item('#notesInputBox').value = dataObject.orderNote;
+		notesContainer.expand();
+	} else if (notesContainer.expand) {
+		notesContainer.collapse();
 	}
 }
 
@@ -120,12 +229,17 @@ export function updStatusDrpdown_change(event) {
 			"currentCount": dataObject.currentCount,
 			"endCount": dataObject.endCount,
 			"productName": dataObject.productName,
-			"orderStatus": dropDown.value
+			"orderStatus": dropDown.value, // value to update
+			"orderNote": dataObject.orderNote
 		};
 
 		let loadingIcon = $item('#statusLoadIcon'); // loading icon
 
 		wixData.update("orders", toUpdate)
+			
+			.then(() => {
+                dataLogging(dataObject.orderStatus, dropDown.value, 'Status Update', dataObject.orderCode); // // =============> DATA LOGGER
+			})
 			.then(() => {
 				loadingIcon.show();
 				$item('#orderStatus').hide();
@@ -141,7 +255,6 @@ export function updStatusDrpdown_change(event) {
 					})
 			})
 	}
-
 }
 
 // === Production count update function
@@ -181,10 +294,14 @@ export function updProdCount_keyPress(event) {
 				"currentCount": Number(countInput.value), // only changing this data. Change to number to make sure its stored as an integer in the DB
 				"endCount": dataObject.endCount,
 				"productName": dataObject.productName,
-				"orderStatus": dataObject.orderStatus
+				"orderStatus": dataObject.orderStatus,
+				"orderNote": dataObject.orderNote
 			};
 
 			let loadingIcon = $item('#progressLoadIcon'); // loading vector
+			let contextRepeater = $item('#mainRepeater');
+
+            dataLogging(dataObject.currentCount, countInput.value, 'Production Count Update', dataObject.orderCode); // =============> DATA LOGGER
 
 			wixData.update("orders", toUpdate)
 				.then(() => {
@@ -196,7 +313,7 @@ export function updProdCount_keyPress(event) {
 							loadingIcon.hide();
 							$item('#orderProgress').show();
 							countInput.value = 'Update Status'; //refersh to default dropdown text/value
-							progressBarUpdater();
+							contextProgressBarUpdater($item); // pass the $item scope into the function
 						})
 				})
 				.catch((err) => {
@@ -206,3 +323,58 @@ export function updProdCount_keyPress(event) {
 	}
 }
 
+export function notesInputBox_keyPress(event) {
+	let $item = $w.at(event.context);
+	let dataObject = $item("#ordersDataset").getCurrentItem();
+	let notesInput = $item('#notesInputBox');
+	let key = event.key;
+
+	if (key === 'Enter') {
+		let toUpdate = {
+			"_id": dataObject._id,
+			"orderCode": dataObject.orderCode,
+			"custEmail": dataObject.custEmail,
+			"custName": dataObject.custName,
+			"currentCount": dataObject.currentCount,
+			"endCount": dataObject.endCount,
+			"productName": dataObject.productName,
+			"orderStatus": dataObject.orderStatus,
+			"orderNote": notesInput.value
+		};
+
+        dataLogging(dataObject.orderNote, notesInput.value, 'Note Update', dataObject.orderCode); // =============> DATA LOGGER
+
+		wixData.update("orders", toUpdate)
+			.then(() => {
+				$w('#ordersDataset').refresh() // refresh data to update the list
+					.then(() => {
+						if (notesInput.value.length === 0) {
+							$item('#notesIcon').hide()
+							$item('#notesIconNoNote').show()
+						} else {
+							$item('#notesIconNoNote').hide()
+							$item('#notesIcon').show()
+						}
+						$item('#notesNotifyTxt').expand().then(() => {
+							setTimeout(() => {
+								$item('#notesNotifyTxt').collapse();
+							}, 1500);
+						})
+					})
+			})
+			.catch((err) => {
+				console.log(err)
+			})
+	}
+
+}
+
+// ========= menu tab button functions ========= // in progress
+
+export function button1_click(event) {
+	let btn = $w('#button1');
+
+	btn.style.backgroundColor = 'rgba(227, 238, 255, 1)';
+	$w('#focusAllOrdersTab').show();
+
+}
