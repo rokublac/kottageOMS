@@ -12,7 +12,7 @@ Mobile and tablet compatible without external app.
 - Export orders into spreadsheet format
 
 ### Supplier use cases:
-- View and manage all orders through the management dashboard. All changed directly reflect to the user-end.
+- View and manage all orders through the management dashboard. All changes directly reflect to the user-end.
 - Search and filter through all orders, past and present.
 - Track all order modifications if you're suss about slippery employees tampering with orders through the data monitoring dashboard.
 
