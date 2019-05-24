@@ -1,92 +1,13 @@
-// Order management 
+/* Order management dashboard 
+	For admins and managers to manage production orders
+*/
 
 import wixData from 'wix-data';
+import {dataLogging} from 'backend/be-om-utilities.jsw';
+import {countInputError} from 'public/pub-om-utilities.js';
+import {mainProgressBarUpdater} from 'public/pub-om-utilities.js';
+import {contextProgressBarUpdater} from 'public/pub-om-utilities.js';
 
-
-// ============================================= FUNCTION LIST (start) ============================================= //
-
-//data logger
-function dataLogging(oldValue, newValue, logAction, orderId) {
-	let toInsert = {
-		"title": `${oldValue} --> ${newValue}`,
-		"logAction": logAction,
-		"orderId": orderId
-	}
-	wixData.insert('dbLogs', toInsert)
-		.then((res) => {
-			console.log('action logged');
-		})
-}
-
-// count input error
-function countInputError(errElement) {
-	errElement.expand();
-	setTimeout(() => {
-		errElement.collapse();
-	}, 2500);
-}
-
-// progressB bar updater
-function mainProgressBarUpdater() {
-	$w('#mainRepeater').forEachItem(($item) => {
-		contextProgressBarUpdater($item);
-	})
-}
-
-// === This function updates the progress bar within the scope of the event context.
-function contextProgressBarUpdater(context) { // context is $item that is passed through from the scope thats calling this function.
-	let dataObject = context("#ordersDataset").getCurrentItem();
-	let progressRatio = dataObject.currentCount / dataObject.endCount;
-
-	// progress bar segmented into four
-	let progress25 = context('#progressBar25');
-	let progress50 = context('#progressBar50');
-	let progress75 = context('#progressBar75');
-	let progress100 = context('#progressBar100');
-
-	if (progressRatio > 0 && progressRatio <= 0.25) {
-		progress25.style.backgroundColor = 'rgba(118, 255, 112, 1)';
-		progress25.show();
-		progress50.hide();
-		progress75.hide();
-		progress100.hide();
-	} else if (progressRatio > 0.25 && progressRatio <= 0.50) {
-		progress25.style.backgroundColor = 'rgba(118, 255, 112, 1)';
-		progress50.style.backgroundColor = 'rgba(118, 255, 112, 1)';
-		progress25.show();
-		progress50.show();
-		progress75.hide();
-		progress100.hide();
-	} else if (progressRatio > 0.50 && progressRatio < 1) {
-		progress25.style.backgroundColor = 'rgba(118, 255, 112, 1)';
-		progress50.style.backgroundColor = 'rgba(118, 255, 112, 1)';
-		progress75.style.backgroundColor = 'rgba(118, 255, 112, 1)';
-		progress25.show();
-		progress50.show();
-		progress75.show();
-		progress100.hide();
-	} else if (progressRatio === 1) {
-		progress25.style.backgroundColor = 'rgba(118, 255, 112, 1)';
-		progress50.style.backgroundColor = 'rgba(118, 255, 112, 1)';
-		progress75.style.backgroundColor = 'rgba(118, 255, 112, 1)';
-		progress100.style.backgroundColor = 'rgba(118, 255, 112, 1)';
-		progress25.show();
-		progress50.show();
-		progress75.show();
-		progress100.show();
-	} else if (progressRatio === 0) {
-		progress25.style.backgroundColor = 'rgba(227, 238, 255, 1)';
-		progress50.style.backgroundColor = 'rgba(227, 238, 255, 1)';
-		progress75.style.backgroundColor = 'rgba(227, 238, 255, 1)';
-		progress100.style.backgroundColor = 'rgba(227, 238, 255, 1)';
-		progress25.show();
-		progress50.show();
-		progress75.show();
-		progress100.show();
-	}
-}
-
-// ============================================= FUNCTION LIST (end) ============================================= //
 
 
 // ======== On ready (start) ======== //
@@ -95,7 +16,7 @@ function contextProgressBarUpdater(context) { // context is $item that is passed
 $w.onReady(function () {
 	$w("#ordersDataset").onReady(() => {
 		// progress bar initial load
-		mainProgressBarUpdater();
+		mainProgressBarUpdater($w('#mainRepeater'));
 		// notes inital load
 		$w('#mainRepeater').forEachItem(($item) => {
 			let dataObject = $item("#ordersDataset").getCurrentItem();
