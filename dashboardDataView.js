@@ -1,4 +1,7 @@
+// Order management 
+
 import wixData from 'wix-data';
+
 
 // ============================================= FUNCTION LIST (start) ============================================= //
 
@@ -26,60 +29,11 @@ function countInputError(errElement) {
 // progressB bar updater
 function mainProgressBarUpdater() {
 	$w('#mainRepeater').forEachItem(($item) => {
-		let dataObject = $item("#ordersDataset").getCurrentItem();
-		let progressRatio = dataObject.currentCount / dataObject.endCount;
-
-		// progress bar segmented into four
-		let progress25 = $item('#progressBar25');
-		let progress50 = $item('#progressBar50');
-		let progress75 = $item('#progressBar75');
-		let progress100 = $item('#progressBar100');
-
-		if (progressRatio > 0 && progressRatio <= 0.25) {
-			progress25.style.backgroundColor = 'rgba(118, 255, 112, 1)';
-			progress25.show();
-			progress50.hide();
-			progress75.hide();
-			progress100.hide();
-		} else if (progressRatio > 0.25 && progressRatio <= 0.50) {
-			progress25.style.backgroundColor = 'rgba(118, 255, 112, 1)';
-			progress50.style.backgroundColor = 'rgba(118, 255, 112, 1)';
-			progress25.show();
-			progress50.show();
-			progress75.hide();
-			progress100.hide();
-		} else if (progressRatio > 0.50 && progressRatio < 1) {
-			progress25.style.backgroundColor = 'rgba(118, 255, 112, 1)';
-			progress50.style.backgroundColor = 'rgba(118, 255, 112, 1)';
-			progress75.style.backgroundColor = 'rgba(118, 255, 112, 1)';
-			progress25.show();
-			progress50.show();
-			progress75.show();
-			progress100.hide();
-		} else if (progressRatio === 1) {
-			progress25.style.backgroundColor = 'rgba(118, 255, 112, 1)';
-			progress50.style.backgroundColor = 'rgba(118, 255, 112, 1)';
-			progress75.style.backgroundColor = 'rgba(118, 255, 112, 1)';
-			progress100.style.backgroundColor = 'rgba(118, 255, 112, 1)';
-			progress25.show();
-			progress50.show();
-			progress75.show();
-			progress100.show();
-		} else if (progressRatio === 0) {
-			progress25.style.backgroundColor = 'rgba(227, 238, 255, 1)';
-			progress50.style.backgroundColor = 'rgba(227, 238, 255, 1)';
-			progress75.style.backgroundColor = 'rgba(227, 238, 255, 1)';
-			progress100.style.backgroundColor = 'rgba(227, 238, 255, 1)';
-			progress25.show();
-			progress50.show();
-			progress75.show();
-			progress100.show();
-		}
+		contextProgressBarUpdater($item);
 	})
 }
 
 // === This function updates the progress bar within the scope of the event context.
-// The function above will iterate through all items which is only needed on inital data load, not everytime someone updates one order.
 function contextProgressBarUpdater(context) { // context is $item that is passed through from the scope thats calling this function.
 	let dataObject = context("#ordersDataset").getCurrentItem();
 	let progressRatio = dataObject.currentCount / dataObject.endCount;
@@ -134,14 +88,15 @@ function contextProgressBarUpdater(context) { // context is $item that is passed
 
 // ============================================= FUNCTION LIST (end) ============================================= //
 
+
 // ======== On ready (start) ======== //
 
 // Progress bar code
 $w.onReady(function () {
 	$w("#ordersDataset").onReady(() => {
-		// progress bar initial injection
+		// progress bar initial load
 		mainProgressBarUpdater();
-		// notes inital injection
+		// notes inital load
 		$w('#mainRepeater').forEachItem(($item) => {
 			let dataObject = $item("#ordersDataset").getCurrentItem();
 			let repeaterNote = $item('#notesInputBox');
@@ -161,6 +116,7 @@ $w.onReady(function () {
 });
 
 // ========== On ready (end) ========= //
+
 
 // ========== Update box functions (Start) ========== //
 
@@ -233,7 +189,7 @@ export function updStatusDrpdown_change(event) {
 			"orderNote": dataObject.orderNote
 		};
 
-		let loadingIcon = $item('#statusLoadIcon'); // loading icon
+		let loadingIcon = $item('#statusLoadIcon');
 
 		wixData.update("orders", toUpdate)
 			
@@ -298,7 +254,7 @@ export function updProdCount_keyPress(event) {
 				"orderNote": dataObject.orderNote
 			};
 
-			let loadingIcon = $item('#progressLoadIcon'); // loading vector
+			let loadingIcon = $item('#progressLoadIcon');
 			let contextRepeater = $item('#mainRepeater');
 
             dataLogging(dataObject.currentCount, countInput.value, 'Production Count Update', dataObject.orderCode); // =============> DATA LOGGER
@@ -313,7 +269,7 @@ export function updProdCount_keyPress(event) {
 							loadingIcon.hide();
 							$item('#orderProgress').show();
 							countInput.value = 'Update Status'; //refersh to default dropdown text/value
-							contextProgressBarUpdater($item); // pass the $item scope into the function
+							contextProgressBarUpdater($item); // update progress bar
 						})
 				})
 				.catch((err) => {
@@ -369,12 +325,3 @@ export function notesInputBox_keyPress(event) {
 
 }
 
-// ========= menu tab button functions ========= // in progress
-
-export function button1_click(event) {
-	let btn = $w('#button1');
-
-	btn.style.backgroundColor = 'rgba(227, 238, 255, 1)';
-	$w('#focusAllOrdersTab').show();
-
-}
