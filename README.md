@@ -1,8 +1,10 @@
 `start date: 13/05/2019`
 # Kottage OSM (in progress)
-Order management system built with Wix Corvid
+Secure and dynamic order management system built with [Wix Corvid](https://www.wix.com/corvid)
 
 Mobile and tablet compatible without external app.
+
+![alt text](https://github.com/rokublac/kottageOMS/blob/master/1.PNG "Logo Title Text 1")
 
 ### Customer use cases:
 - Handle account information without the neccessity to call supplier. All account changes will trigger a high priority notification alert to top management.
