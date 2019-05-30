@@ -1,19 +1,79 @@
-/* Order management dashboard 
-	For admins and managers to manage production orders
-*/
+// Order management section
 
 import wixData from 'wix-data';
-import {dataLogging} from 'backend/be-om-utilities.jsw';
-import {countInputError} from 'public/pub-om-utilities.js';
-import {mainProgressBarUpdater} from 'public/pub-om-utilities.js';
-import {contextProgressBarUpdater} from 'public/pub-om-utilities.js';
+import { dataLogging } from 'backend/be-om-utilities.jsw';
+import { countInputError } from 'public/pub-om-utilities.js';
+import { mainProgressBarUpdater } from 'public/pub-om-utilities.js';
+import { contextProgressBarUpdater } from 'public/pub-om-utilities.js';
 
+function btnLabelFetch() {
+	let allOrdersBtn = $w('#allBtn');
+	let pendingBtn = $w('#pendingBtn');
+	let inProdBtn = $w('#inProdBtn');
+	let completeBtn = $w('#completeBtn');
 
+	// query DB for count of data to label buttons with count number
+	wixData.query('orders').find()
+		.then(allOrdData => {
+			allOrdersBtn.label = "ALL ORDER (" + allOrdData.totalCount + ")"
+		})
+		.then(() => {
+			wixData.query('orders')
+				.eq('orderStatus', 'Pending')
+				.find()
+				.then(pendingData => {
+					pendingBtn.label = "PENDING (" + pendingData.totalCount + ")"
+				})
+		})
+		.then(() => {
+			wixData.query('orders')
+				.eq('orderStatus', 'In Production')
+				.find()
+				.then(inProdData => {
+					inProdBtn.label = "IN PRODUCTION (" + inProdData.totalCount + ")"
+				})
+		})
+		.then(() => {
+			wixData.query('orders')
+				.eq('orderStatus', 'Complete')
+				.find()
+				.then(completeData => {
+					completeBtn.label = "COMPLETE (" + completeData.totalCount + ")"
+				})
+		})
+}
+
+function btnToggles(clickedBtnId) {
+	let buttons = {
+		'allBtn': $w('#allBtn'),
+		'pendingBtn': $w('#pendingBtn'),
+		'inPRodBtn': $w('#inProdBtn'),
+		'completeBtn': $w('#completeBtn')
+	}
+
+	if (clickedBtnId === 'allBtn') {
+		for (let key in buttons) {
+			if (key === clickedBtnId) {
+				buttons[key].disable();
+			}
+		}
+	}
+	/*else if (clickedBtn.id === 'pendingBtn') {
+		console.log(2)
+	} else if (clickedBtn.id === 'inProdBtn') {
+		console.log(3)
+	} else if (clickedBtn.id === 'completeBtn') {
+		console.log(4)
+	}*/
+
+}
 
 // ======== On ready (start) ======== //
 
 // Progress bar code
 $w.onReady(function () {
+	btnLabelFetch()
+	// $w('#allBtn').disable();
 	$w("#ordersDataset").onReady(() => {
 		// progress bar initial load
 		mainProgressBarUpdater($w('#mainRepeater'));
@@ -35,9 +95,14 @@ $w.onReady(function () {
 		})
 	})
 });
-
 // ========== On ready (end) ========= //
 
+// ========== Navigation buttons (start) ========== //
+
+export function allBtn_click(event) {
+	btnToggles(event.target.id);
+}
+// ========== Navigation buttons (end) ========== //
 
 // ========== Update box functions (Start) ========== //
 
@@ -113,9 +178,9 @@ export function updStatusDrpdown_change(event) {
 		let loadingIcon = $item('#statusLoadIcon');
 
 		wixData.update("orders", toUpdate)
-			
+
 			.then(() => {
-                dataLogging(dataObject.orderStatus, dropDown.value, 'Status Update', dataObject.orderCode); // // =============> DATA LOGGER
+				dataLogging(dataObject.orderStatus, dropDown.value, 'Status Update', dataObject.orderCode); // // =============> DATA LOGGER
 			})
 			.then(() => {
 				loadingIcon.show();
@@ -126,6 +191,7 @@ export function updStatusDrpdown_change(event) {
 						loadingIcon.hide();
 						$item('#orderStatus').show();
 						dropDown.value = 'Update Status'; //refersh to default dropdown text/value
+						btnLabelFetch(); // update button labels
 					})
 					.catch((err) => {
 						console.log(err)
@@ -178,7 +244,7 @@ export function updProdCount_keyPress(event) {
 			let loadingIcon = $item('#progressLoadIcon');
 			let contextRepeater = $item('#mainRepeater');
 
-            dataLogging(dataObject.currentCount, countInput.value, 'Production Count Update', dataObject.orderCode); // =============> DATA LOGGER
+			dataLogging(dataObject.currentCount, countInput.value, 'Production Count Update', dataObject.orderCode); // =============> DATA LOGGER
 
 			wixData.update("orders", toUpdate)
 				.then(() => {
@@ -219,7 +285,7 @@ export function notesInputBox_keyPress(event) {
 			"orderNote": notesInput.value
 		};
 
-        dataLogging(dataObject.orderNote, notesInput.value, 'Note Update', dataObject.orderCode); // =============> DATA LOGGER
+		dataLogging(dataObject.orderNote, notesInput.value, 'Note Update', dataObject.orderCode); // =============> DATA LOGGER
 
 		wixData.update("orders", toUpdate)
 			.then(() => {
@@ -245,4 +311,3 @@ export function notesInputBox_keyPress(event) {
 	}
 
 }
-
