@@ -47,24 +47,63 @@ function btnToggles(clickedBtnId) {
 	let buttons = {
 		'allBtn': $w('#allBtn'),
 		'pendingBtn': $w('#pendingBtn'),
-		'inPRodBtn': $w('#inProdBtn'),
+		'inProdBtn': $w('#inProdBtn'),
 		'completeBtn': $w('#completeBtn')
 	}
 
-	if (clickedBtnId === 'allBtn') {
-		for (let key in buttons) {
-			if (key === clickedBtnId) {
-				buttons[key].disable();
-			}
+	for (let key in buttons) {
+		// disable the clicked button
+		if (key === clickedBtnId) {
+			buttons[key].disable();
+			// else enable it to be clicked
+		} else {
+			buttons[key].enable();
 		}
 	}
-	/*else if (clickedBtn.id === 'pendingBtn') {
-		console.log(2)
-	} else if (clickedBtn.id === 'inProdBtn') {
-		console.log(3)
-	} else if (clickedBtn.id === 'completeBtn') {
-		console.log(4)
-	}*/
+}
+
+function btnDbQuery(btnId) {
+	let status = '';
+
+	if (btnId === 'pendingBtn') {
+		status = 'Pending';
+	}
+	if (btnId === 'inProdBtn') {
+		status = 'In Production';
+	}
+	if (btnId === 'completeBtn') {
+		status = 'Complete';
+	}
+
+	// filter DB
+	$w("#ordersDataset").setFilter(wixData.filter()
+		.eq('orderStatus', status)
+	);
+	// refresh data to update the list
+	$w('#ordersDataset').refresh()
+		.then(() => {
+			console.log('fetched');
+			mainProgressBarUpdater($w('#mainRepeater'));
+			// notes inital load
+			$w('#mainRepeater').forEachItem(($item) => {
+				let dataObject = $item("#ordersDataset").getCurrentItem();
+				let repeaterNote = $item('#notesInputBox');
+				let noteIcon = $item('#notesIcon');
+				let notesIconNoNote = $item('#notesIconNoNote');
+
+				repeaterNote.value = dataObject.orderNote;
+				if (repeaterNote.value.length === 0) {
+					noteIcon.hide();
+					notesIconNoNote.show();
+				} else {
+					noteIcon.show();
+					notesIconNoNote.hide();
+				}
+			})
+		})
+		.catch((err) => {
+			console.log(err)
+		})
 
 }
 
@@ -73,7 +112,6 @@ function btnToggles(clickedBtnId) {
 // Progress bar code
 $w.onReady(function () {
 	btnLabelFetch()
-	// $w('#allBtn').disable();
 	$w("#ordersDataset").onReady(() => {
 		// progress bar initial load
 		mainProgressBarUpdater($w('#mainRepeater'));
@@ -101,7 +139,25 @@ $w.onReady(function () {
 
 export function allBtn_click(event) {
 	btnToggles(event.target.id);
+	btnDbQuery(event.target.id);
 }
+
+export function pendingBtn_click(event) {
+	btnToggles(event.target.id);
+	btnDbQuery(event.target.id);
+}
+
+export function inProdBtn_click(event) {
+	btnToggles(event.target.id);
+	btnDbQuery(event.target.id);
+
+}
+
+export function completeBtn_click(event) {
+	btnToggles(event.target.id);
+	btnDbQuery(event.target.id);
+}
+
 // ========== Navigation buttons (end) ========== //
 
 // ========== Update box functions (Start) ========== //
@@ -189,9 +245,10 @@ export function updStatusDrpdown_change(event) {
 					.then(() => {
 						console.log('status has been updated!');
 						loadingIcon.hide();
+						btnLabelFetch(); // update button labels
 						$item('#orderStatus').show();
 						dropDown.value = 'Update Status'; //refersh to default dropdown text/value
-						btnLabelFetch(); // update button labels
+						
 					})
 					.catch((err) => {
 						console.log(err)
@@ -311,3 +368,4 @@ export function notesInputBox_keyPress(event) {
 	}
 
 }
+
