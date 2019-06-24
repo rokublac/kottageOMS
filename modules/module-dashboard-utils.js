@@ -1,3 +1,6 @@
+import wixData from 'wix-data';
+
+
 // element error control - will notify user if count value during update is valid
 export function countInputError(errElement) {
 	errElement.expand();
@@ -60,10 +63,111 @@ export function contextProgressBarUpdater(context) { // context is $item that is
 	}
 }
 
-
 // initial progress bar loader
 export function mainProgressBarUpdater(mainRepeater) {
 	mainRepeater.forEachItem(($item) => {
 		contextProgressBarUpdater($item);
 	})
+}
+
+// ====== BUTTON TABS ====== 
+
+// front end button functionality
+export function btnToggles(clickedBtnId, allBtn, pendingBtn, inProdBtn, completeBtn) {
+	let buttons = {
+		'allBtn': allBtn,
+		'pendingBtn': pendingBtn,
+		'inProdBtn': inProdBtn,
+		'completeBtn': completeBtn
+	}
+	for (let key in buttons) {
+		// disable the clicked button
+		if (key === clickedBtnId) {
+			buttons[key].disable();
+			// else enable it to be clicked
+		} else {
+			buttons[key].enable();
+		}
+	}
+}
+
+// fetches the count number in button labels
+export function btnLabelFetch(allBtn, pendingBtn, inProdBtn, completeBtn) {
+	// query DB for count of data to label buttons with count number
+	wixData.query('orders').find()
+		.then(allOrdData => {
+			allBtn.label = "ALL ORDER (" + allOrdData.totalCount + ")"
+		})
+		.then(() => {
+			wixData.query('orders')
+				.eq('orderStatus', 'Pending')
+				.find()
+				.then(pendingData => {
+					pendingBtn.label = "PENDING (" + pendingData.totalCount + ")"
+				})
+		})
+		.then(() => {
+			wixData.query('orders')
+				.eq('orderStatus', 'In Production')
+				.find()
+				.then(inProdData => {
+					inProdBtn.label = "IN PRODUCTION (" + inProdData.totalCount + ")"
+				})
+		})
+		.then(() => {
+			wixData.query('orders')
+				.eq('orderStatus', 'Complete')
+				.find()
+				.then(completeData => {
+					completeBtn.label = "COMPLETE (" + completeData.totalCount + ")"
+				})
+		})
+}
+
+// when you press buttons this will filter the repeater
+export function btnDbQuery(btnId, dataset, repeater) {
+	// button dictionary
+	let buttonSet = {
+		'allBtn': 'All',
+		'pendingBtn': 'Pending',
+		'inProdBtn': 'In Production',
+		'completeBtn': 'Complete'
+	}
+	// grab value from key
+	let status = buttonSet[btnId];
+	let filter = null;
+
+	// filter depending on logic and the process to refresh and load.
+	if (status === 'All') {
+		filter = dataset.setFilter(wixData.filter());
+	} else {
+		filter = dataset.setFilter(wixData.filter()
+			.eq('orderStatus', status)
+		);
+	}
+	// refresh data to update the list
+	dataset.refresh()
+		.then(() => {
+			console.log('Data fetched', status);
+			mainProgressBarUpdater(repeater);
+			// notes inital load
+			repeater.forEachItem(($item) => {
+				let dataObject = $item("#ordersDataset").getCurrentItem();
+				let repeaterNote = $item('#notesInputBox');
+				let noteIcon = $item('#notesIcon');
+				let notesIconNoNote = $item('#notesIconNoNote');
+
+				repeaterNote.value = dataObject.orderNote;
+				if (repeaterNote.value.length === 0) {
+					noteIcon.hide();
+					notesIconNoNote.show();
+				} else {
+					noteIcon.show();
+					notesIconNoNote.hide();
+				}
+			})
+		})
+		.catch((err) => {
+			console.log(err)
+		})
 }
