@@ -1,117 +1,29 @@
-// Order management section
+// ORDER MANAGEMENT CODE
 
 import wixData from 'wix-data';
+
+// for data logging
 import { dataLogging } from 'backend/be-om-utilities.jsw';
+
+// dynamic inputs for orders
 import { countInputError } from 'public/pub-om-utilities.js';
 import { mainProgressBarUpdater } from 'public/pub-om-utilities.js';
 import { contextProgressBarUpdater } from 'public/pub-om-utilities.js';
 
-function btnLabelFetch() {
-	let allOrdersBtn = $w('#allBtn');
-	let pendingBtn = $w('#pendingBtn');
-	let inProdBtn = $w('#inProdBtn');
-	let completeBtn = $w('#completeBtn');
+// button utilities
+import { btnLabelFetch } from 'public/pub-om-utilities.js';
+import { btnToggles } from 'public/pub-om-utilities.js';
+import {btnDbQuery} from 'public/pub-om-utilities.js';
 
-	// query DB for count of data to label buttons with count number
-	wixData.query('orders').find()
-		.then(allOrdData => {
-			allOrdersBtn.label = "ALL ORDER (" + allOrdData.totalCount + ")"
-		})
-		.then(() => {
-			wixData.query('orders')
-				.eq('orderStatus', 'Pending')
-				.find()
-				.then(pendingData => {
-					pendingBtn.label = "PENDING (" + pendingData.totalCount + ")"
-				})
-		})
-		.then(() => {
-			wixData.query('orders')
-				.eq('orderStatus', 'In Production')
-				.find()
-				.then(inProdData => {
-					inProdBtn.label = "IN PRODUCTION (" + inProdData.totalCount + ")"
-				})
-		})
-		.then(() => {
-			wixData.query('orders')
-				.eq('orderStatus', 'Complete')
-				.find()
-				.then(completeData => {
-					completeBtn.label = "COMPLETE (" + completeData.totalCount + ")"
-				})
-		})
-}
 
-function btnToggles(clickedBtnId) {
-	let buttons = {
-		'allBtn': $w('#allBtn'),
-		'pendingBtn': $w('#pendingBtn'),
-		'inProdBtn': $w('#inProdBtn'),
-		'completeBtn': $w('#completeBtn')
-	}
-
-	for (let key in buttons) {
-		// disable the clicked button
-		if (key === clickedBtnId) {
-			buttons[key].disable();
-			// else enable it to be clicked
-		} else {
-			buttons[key].enable();
-		}
-	}
-}
-
-function btnDbQuery(btnId) {
-	let status = '';
-
-	if (btnId === 'pendingBtn') {
-		status = 'Pending';
-	}
-	if (btnId === 'inProdBtn') {
-		status = 'In Production';
-	}
-	if (btnId === 'completeBtn') {
-		status = 'Complete';
-	}
-
-	// filter DB
-	$w("#ordersDataset").setFilter(wixData.filter()
-		.eq('orderStatus', status)
-	);
-	// refresh data to update the list
-	$w('#ordersDataset').refresh()
-		.then(() => {
-			console.log('fetched');
-			mainProgressBarUpdater($w('#mainRepeater'));
-			// notes inital load
-			$w('#mainRepeater').forEachItem(($item) => {
-				let dataObject = $item("#ordersDataset").getCurrentItem();
-				let repeaterNote = $item('#notesInputBox');
-				let noteIcon = $item('#notesIcon');
-				let notesIconNoNote = $item('#notesIconNoNote');
-
-				repeaterNote.value = dataObject.orderNote;
-				if (repeaterNote.value.length === 0) {
-					noteIcon.hide();
-					notesIconNoNote.show();
-				} else {
-					noteIcon.show();
-					notesIconNoNote.hide();
-				}
-			})
-		})
-		.catch((err) => {
-			console.log(err)
-		})
-
-}
 
 // ======== On ready (start) ======== //
 
 // Progress bar code
 $w.onReady(function () {
-	btnLabelFetch()
+	$w('#allBtn').disable();
+	btnLabelFetch($w('#allBtn'), $w('#pendingBtn'), $w('#inProdBtn'), $w('#completeBtn'));
+
 	$w("#ordersDataset").onReady(() => {
 		// progress bar initial load
 		mainProgressBarUpdater($w('#mainRepeater'));
@@ -138,24 +50,28 @@ $w.onReady(function () {
 // ========== Navigation buttons (start) ========== //
 
 export function allBtn_click(event) {
-	btnToggles(event.target.id);
-	btnDbQuery(event.target.id);
+	btnToggles(event.target.id, $w('#allBtn'), $w('#pendingBtn'), $w('#inProdBtn'), $w('#completeBtn'));
+	btnDbQuery(event.target.id, $w('#ordersDataset'), $w('#mainRepeater'));
+	$w('#repeaterTitle').text = 'All Orders';
 }
 
 export function pendingBtn_click(event) {
-	btnToggles(event.target.id);
-	btnDbQuery(event.target.id);
+	btnToggles(event.target.id, $w('#allBtn'), $w('#pendingBtn'), $w('#inProdBtn'), $w('#completeBtn'));
+	btnDbQuery(event.target.id, $w('#ordersDataset'), $w('#mainRepeater'));
+	$w('#repeaterTitle').text = 'Pending Orders';
 }
 
 export function inProdBtn_click(event) {
-	btnToggles(event.target.id);
-	btnDbQuery(event.target.id);
+	btnToggles(event.target.id, $w('#allBtn'), $w('#pendingBtn'), $w('#inProdBtn'), $w('#completeBtn'));
+	btnDbQuery(event.target.id, $w('#ordersDataset'), $w('#mainRepeater'));
+	$w('#repeaterTitle').text = 'In Production Orders';
 
 }
 
 export function completeBtn_click(event) {
-	btnToggles(event.target.id);
-	btnDbQuery(event.target.id);
+	btnToggles(event.target.id, $w('#allBtn'), $w('#pendingBtn'), $w('#inProdBtn'), $w('#completeBtn'));
+	btnDbQuery(event.target.id, $w('#ordersDataset'), $w('#mainRepeater'));
+	$w('#repeaterTitle').text = 'Completed Orders';
 }
 
 // ========== Navigation buttons (end) ========== //
@@ -245,10 +161,10 @@ export function updStatusDrpdown_change(event) {
 					.then(() => {
 						console.log('status has been updated!');
 						loadingIcon.hide();
-						btnLabelFetch(); // update button labels
+						btnLabelFetch($w('#allBtn'), $w('#pendingBtn'), $w('#inProdBtn'), $w('#completeBtn')); // update button labels
 						$item('#orderStatus').show();
 						dropDown.value = 'Update Status'; //refersh to default dropdown text/value
-						
+
 					})
 					.catch((err) => {
 						console.log(err)
@@ -366,6 +282,4 @@ export function notesInputBox_keyPress(event) {
 				console.log(err)
 			})
 	}
-
 }
-
