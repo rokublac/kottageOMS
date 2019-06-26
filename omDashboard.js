@@ -3,7 +3,7 @@
 import wixData from 'wix-data';
 
 // for data logging
-import { dataLogging } from 'backend/be-om-utilities.jsw';
+import { updateDataLogging } from 'backend/loggin-utilities.jsw';
 
 // dynamic inputs for orders
 import { countInputError } from 'public/pub-om-utilities.js';
@@ -152,7 +152,7 @@ export function updStatusDrpdown_change(event) {
 		wixData.update("orders", toUpdate)
 
 			.then(() => {
-				dataLogging(dataObject.orderStatus, dropDown.value, 'Status Update', dataObject.orderCode); // // =============> DATA LOGGER
+				updateDataLogging(dataObject.orderStatus, dropDown.value, 'Status Update', dataObject.orderCode); // // =============> DATA LOGGER
 			})
 			.then(() => {
 				loadingIcon.show();
@@ -217,7 +217,7 @@ export function updProdCount_keyPress(event) {
 			let loadingIcon = $item('#progressLoadIcon');
 			let contextRepeater = $item('#mainRepeater');
 
-			dataLogging(dataObject.currentCount, countInput.value, 'Production Count Update', dataObject.orderCode); // =============> DATA LOGGER
+			updateDataLogging(dataObject.currentCount, countInput.value, 'Production Count Update', dataObject.orderCode); // =============> DATA LOGGER
 
 			wixData.update("orders", toUpdate)
 				.then(() => {
@@ -258,7 +258,7 @@ export function notesInputBox_keyPress(event) {
 			"orderNote": notesInput.value
 		};
 
-		dataLogging(dataObject.orderNote, notesInput.value, 'Note Update', dataObject.orderCode); // =============> DATA LOGGER
+		updateDataLogging(dataObject.orderNote, notesInput.value, 'Note Update', dataObject.orderCode); // =============> DATA LOGGER
 
 		wixData.update("orders", toUpdate)
 			.then(() => {
