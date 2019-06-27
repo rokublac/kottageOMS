@@ -125,7 +125,7 @@ export function btnLabelFetch(allBtn, pendingBtn, inProdBtn, completeBtn) {
 }
 
 // when you press buttons this will filter the repeater
-export function btnDbQuery(btnId, dataset, repeater) {
+export function btnDbQuery(btnId, dataset, repeater, loading, titleElement, titleName) {
 	// button dictionary
 	let buttonSet = {
 		'allBtn': 'All',
@@ -148,7 +148,7 @@ export function btnDbQuery(btnId, dataset, repeater) {
 	// refresh data to update the list
 	dataset.refresh()
 		.then(() => {
-			console.log('Data fetched', status);
+			console.log('Data fetched', status, titleName);
 			mainProgressBarUpdater(repeater);
 			// notes inital load
 			repeater.forEachItem(($item) => {
@@ -166,6 +166,8 @@ export function btnDbQuery(btnId, dataset, repeater) {
 					notesIconNoNote.hide();
 				}
 			})
+			loading.hide();
+			titleElement.text = titleName;
 		})
 		.catch((err) => {
 			console.log(err)
