@@ -3,7 +3,7 @@
 import wixData from 'wix-data';
 
 // for data logging
-import { updateDataLogging } from 'backend/loggin-utilities.jsw';
+import { updateDataLogging } from 'backend/logging-utilities.jsw';
 
 // dynamic inputs for orders
 import { countInputError } from 'public/pub-om-utilities.js';
@@ -13,9 +13,7 @@ import { contextProgressBarUpdater } from 'public/pub-om-utilities.js';
 // button utilities
 import { btnLabelFetch } from 'public/pub-om-utilities.js';
 import { btnToggles } from 'public/pub-om-utilities.js';
-import {btnDbQuery} from 'public/pub-om-utilities.js';
-
-
+import { btnDbQuery } from 'public/pub-om-utilities.js';
 
 // ======== On ready (start) ======== //
 
@@ -50,29 +48,32 @@ $w.onReady(function () {
 // ========== Navigation buttons (start) ========== //
 
 export function allBtn_click(event) {
+	// show loading text while fetching orders data
+	$w('#fetchingOrdersTxt').show();
+	// button UI mechanics
 	btnToggles(event.target.id, $w('#allBtn'), $w('#pendingBtn'), $w('#inProdBtn'), $w('#completeBtn'));
-	btnDbQuery(event.target.id, $w('#ordersDataset'), $w('#mainRepeater'));
-	$w('#repeaterTitle').text = 'All Orders';
+	// Fetch from db - change repeater title and hide loading text when complete
+	btnDbQuery(event.target.id, $w('#ordersDataset'), $w('#mainRepeater'), $w('#fetchingOrdersTxt'), $w('#repeaterTitle'), 'All Orders');
 }
 
 export function pendingBtn_click(event) {
+	$w('#fetchingOrdersTxt').show();
 	btnToggles(event.target.id, $w('#allBtn'), $w('#pendingBtn'), $w('#inProdBtn'), $w('#completeBtn'));
-	btnDbQuery(event.target.id, $w('#ordersDataset'), $w('#mainRepeater'));
-	$w('#repeaterTitle').text = 'Pending Orders';
+	btnDbQuery(event.target.id, $w('#ordersDataset'), $w('#mainRepeater'), $w('#fetchingOrdersTxt'), $w('#repeaterTitle'), 'Pending Orders');
 }
 
 export function inProdBtn_click(event) {
+	$w('#fetchingOrdersTxt').show();
 	btnToggles(event.target.id, $w('#allBtn'), $w('#pendingBtn'), $w('#inProdBtn'), $w('#completeBtn'));
-	btnDbQuery(event.target.id, $w('#ordersDataset'), $w('#mainRepeater'));
-	$w('#repeaterTitle').text = 'In Production Orders';
-
+	btnDbQuery(event.target.id, $w('#ordersDataset'), $w('#mainRepeater'), $w('#fetchingOrdersTxt'), $w('#repeaterTitle'), 'In Production Orders');
 }
 
 export function completeBtn_click(event) {
+	$w('#fetchingOrdersTxt').show();
 	btnToggles(event.target.id, $w('#allBtn'), $w('#pendingBtn'), $w('#inProdBtn'), $w('#completeBtn'));
-	btnDbQuery(event.target.id, $w('#ordersDataset'), $w('#mainRepeater'));
-	$w('#repeaterTitle').text = 'Completed Orders';
+	btnDbQuery(event.target.id, $w('#ordersDataset'), $w('#mainRepeater'), $w('#fetchingOrdersTxt'), $w('#repeaterTitle'), 'Completed Orders');
 }
+
 
 // ========== Navigation buttons (end) ========== //
 
@@ -283,3 +284,4 @@ export function notesInputBox_keyPress(event) {
 			})
 	}
 }
+
