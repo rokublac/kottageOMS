@@ -5,6 +5,7 @@ Secure and dynamic order management system built with [Wix Corvid](https://www.w
 Mobile and tablet compatible without external app.
 
 ![dashboard screenshot](https://github.com/rokublac/kottageOMS/blob/master/1.PNG "ui-draft")
+(prototype)
 
 ### Customer use cases:
 - Handle account information without the neccessity to call supplier. All account changes will trigger a high priority notification alert to top management.
