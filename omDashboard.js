@@ -24,7 +24,7 @@ $w.onReady(function () {
 
 	$w("#ordersDataset").onReady(() => {
 		// progress bar initial load
-		mainProgressBarUpdater($w('#mainRepeater'));
+		mainProgressBarUpdater($w('#mainRepeater'), "#ordersDataset");
 		// notes inital load
 		$w('#mainRepeater').forEachItem(($item) => {
 			let dataObject = $item("#ordersDataset").getCurrentItem();
@@ -53,25 +53,25 @@ export function allBtn_click(event) {
 	// button UI mechanics
 	btnToggles(event.target.id, $w('#allBtn'), $w('#pendingBtn'), $w('#inProdBtn'), $w('#completeBtn'));
 	// Fetch from db - change repeater title and hide loading text when complete
-	btnDbQuery(event.target.id, $w('#ordersDataset'), $w('#mainRepeater'), $w('#fetchingOrdersTxt'), $w('#repeaterTitle'), 'All Orders');
+	btnDbQuery(event.target.id, '#ordersDataset', $w('#mainRepeater'), $w('#fetchingOrdersTxt'), $w('#repeaterTitle'), 'All Orders');
 }
 
 export function pendingBtn_click(event) {
 	$w('#fetchingOrdersTxt').show();
 	btnToggles(event.target.id, $w('#allBtn'), $w('#pendingBtn'), $w('#inProdBtn'), $w('#completeBtn'));
-	btnDbQuery(event.target.id, $w('#ordersDataset'), $w('#mainRepeater'), $w('#fetchingOrdersTxt'), $w('#repeaterTitle'), 'Pending Orders');
+	btnDbQuery(event.target.id, '#ordersDataset', $w('#mainRepeater'), $w('#fetchingOrdersTxt'), $w('#repeaterTitle'), 'Pending Orders');
 }
 
 export function inProdBtn_click(event) {
 	$w('#fetchingOrdersTxt').show();
 	btnToggles(event.target.id, $w('#allBtn'), $w('#pendingBtn'), $w('#inProdBtn'), $w('#completeBtn'));
-	btnDbQuery(event.target.id, $w('#ordersDataset'), $w('#mainRepeater'), $w('#fetchingOrdersTxt'), $w('#repeaterTitle'), 'In Production Orders');
+	btnDbQuery(event.target.id, '#ordersDataset', $w('#mainRepeater'), $w('#fetchingOrdersTxt'), $w('#repeaterTitle'), 'In Production Orders');
 }
 
 export function completeBtn_click(event) {
 	$w('#fetchingOrdersTxt').show();
 	btnToggles(event.target.id, $w('#allBtn'), $w('#pendingBtn'), $w('#inProdBtn'), $w('#completeBtn'));
-	btnDbQuery(event.target.id, $w('#ordersDataset'), $w('#mainRepeater'), $w('#fetchingOrdersTxt'), $w('#repeaterTitle'), 'Completed Orders');
+	btnDbQuery(event.target.id, '#ordersDataset', $w('#mainRepeater'), $w('#fetchingOrdersTxt'), $w('#repeaterTitle'), 'Completed Orders');
 }
 
 
@@ -230,7 +230,7 @@ export function updProdCount_keyPress(event) {
 							loadingIcon.hide();
 							$item('#orderProgress').show();
 							countInput.value = 'Update Status'; //refersh to default dropdown text/value
-							contextProgressBarUpdater($item); // update progress bar
+							contextProgressBarUpdater($item, "#ordersDataset"); // update progress bar
 						})
 				})
 				.catch((err) => {
@@ -284,4 +284,3 @@ export function notesInputBox_keyPress(event) {
 			})
 	}
 }
-
