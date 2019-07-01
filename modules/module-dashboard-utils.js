@@ -11,8 +11,8 @@ export function countInputError(errElement) {
 
 
 // === This function updates the progress bar within the scope of the event context.
-export function contextProgressBarUpdater(context) { // context is $item that is passed through from the scope thats calling this function.
-	let dataObject = context("#ordersDataset").getCurrentItem();
+export function contextProgressBarUpdater(context, datasetId) { // context is $item that is passed through from the scope thats calling this function.
+	let dataObject = context(datasetId).getCurrentItem();
 	let progressRatio = dataObject.currentCount / dataObject.endCount;
 
 	// progress bar segmented into four
@@ -64,9 +64,9 @@ export function contextProgressBarUpdater(context) { // context is $item that is
 }
 
 // initial progress bar loader
-export function mainProgressBarUpdater(mainRepeater) {
+export function mainProgressBarUpdater(mainRepeater, datasetId) {
 	mainRepeater.forEachItem(($item) => {
-		contextProgressBarUpdater($item);
+		contextProgressBarUpdater($item, datasetId);
 	})
 }
 
@@ -125,7 +125,7 @@ export function btnLabelFetch(allBtn, pendingBtn, inProdBtn, completeBtn) {
 }
 
 // when you press buttons this will filter the repeater
-export function btnDbQuery(btnId, dataset, repeater, loading, titleElement, titleName) {
+export function btnDbQuery(btnId, datasetId, repeater, loading, titleElement, titleName) {
 	// button dictionary
 	let buttonSet = {
 		'allBtn': 'All',
@@ -139,20 +139,20 @@ export function btnDbQuery(btnId, dataset, repeater, loading, titleElement, titl
 
 	// filter depending on logic and the process to refresh and load.
 	if (status === 'All') {
-		filter = dataset.setFilter(wixData.filter());
+		filter = $w(datasetId).setFilter(wixData.filter());
 	} else {
-		filter = dataset.setFilter(wixData.filter()
+		filter = $w(datasetId).setFilter(wixData.filter()
 			.eq('orderStatus', status)
 		);
 	}
 	// refresh data to update the list
-	dataset.refresh()
+	$w(datasetId).refresh()
 		.then(() => {
 			console.log('Data fetched', status, titleName);
-			mainProgressBarUpdater(repeater);
+			mainProgressBarUpdater(repeater, datasetId);
 			// notes inital load
 			repeater.forEachItem(($item) => {
-				let dataObject = $item("#ordersDataset").getCurrentItem();
+				let dataObject = $item(datasetId).getCurrentItem();
 				let repeaterNote = $item('#notesInputBox');
 				let noteIcon = $item('#notesIcon');
 				let notesIconNoNote = $item('#notesIconNoNote');
@@ -166,7 +166,9 @@ export function btnDbQuery(btnId, dataset, repeater, loading, titleElement, titl
 					notesIconNoNote.hide();
 				}
 			})
+			// hide loading text
 			loading.hide();
+			// change repeater title
 			titleElement.text = titleName;
 		})
 		.catch((err) => {
