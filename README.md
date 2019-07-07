@@ -1,4 +1,4 @@
-`SAAS start date: 13/05/2019`
+`Completed`
 # monoflow OMS (in progress)
 Secure and dynamic order management system built with [Wix Corvid](https://www.wix.com/corvid)
 
