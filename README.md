@@ -1,5 +1,5 @@
 `Completed`
-# monoflow OMS (in progress)
+# monoflow OMS
 Secure and dynamic order management system built with [Wix Corvid](https://www.wix.com/corvid)
 
 Mobile and tablet compatible without external app.
